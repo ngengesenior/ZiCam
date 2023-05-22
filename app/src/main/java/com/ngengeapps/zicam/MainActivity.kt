@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -18,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.ngengeapps.zicam.databinding.ActivityMainBinding
+import org.opencv.android.OpenCVLoader
 
 class MainActivity : AppCompatActivity() {
 
@@ -74,10 +76,16 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (OpenCVLoader.initDebug()) {
+            Toast.makeText(this, "OpenCV loaded", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "OpenCV never loaded", Toast.LENGTH_SHORT).show()
+
+        }
+
         registerCameraLauncher()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

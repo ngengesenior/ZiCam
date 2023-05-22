@@ -3,26 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/videoCamFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
+        android:id="@+id/photoCameraFragment"
         android:name="com.ngengeapps.zicam.CameraFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_camera">
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
-    </fragment>
+        android:label=""
+        tools:layout="@layout/fragment_camera" />
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.ngengeapps.zicam.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
-    </fragment>
+        android:id="@+id/videoCamFragment"
+        android:name="com.ngengeapps.zicam.video.VideoCameraFragment"
+        android:label=""
+        tools:layout="@layout/fragment_video_camera" />
 </navigation>
