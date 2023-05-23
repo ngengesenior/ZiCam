@@ -18,5 +18,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ZiCam"
 include(":app")
-//include("opencv46")
 
