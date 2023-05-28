@@ -3,10 +3,12 @@ package com.ngengeapps.zicam
 
 import android.Manifest.permission.CAMERA
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,34 +21,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.video.MediaStoreOutputOptions
-import androidx.camera.video.Recorder
-import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
-import androidx.camera.video.VideoRecordEvent
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_DURATION_LIMIT_REACHED
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_ENCODING_FAILED
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_INSUFFICIENT_STORAGE
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_INVALID_OUTPUT_OPTIONS
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NO_VALID_DATA
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_RECORDER_ERROR
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_SOURCE_INACTIVE
-import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_UNKNOWN
-import androidx.camera.view.CameraController.IMAGE_ANALYSIS
-import androidx.camera.view.CameraController.IMAGE_CAPTURE
-import androidx.camera.view.CameraController.VIDEO_CAPTURE
 import androidx.camera.view.LifecycleCameraController
-import androidx.camera.view.video.AudioConfig
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.viewModels
 import com.google.android.material.imageview.ShapeableImageView
 import com.ngengeapps.zicam.databinding.FragmentCameraBinding
-import com.ngengeapps.zicam.permissions.PermissionViewModel
 
 
 class CameraFragment : Fragment() {
@@ -55,31 +37,43 @@ class CameraFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var cameraController: LifecycleCameraController
+    private val cameraController: LifecycleCameraController by lazy {
+        LifecycleCameraController(requireContext())
+    }
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
-    private val permissionViewModel: PermissionViewModel by activityViewModels()
-    private val TAG = CameraFragment::class.simpleName
-    private var recording: Recording? = null
-    private var videoCapture: VideoCapture<Recorder>? = null
 
-    private lateinit var recordVideoButton: View
-    private lateinit var pauseRecordingVideoButton: ImageView
-    private lateinit var stopVideoRecordingButton: ImageView
     private lateinit var flipCameraButton: ImageView
     private lateinit var captureImageButton: View
     private lateinit var imageVideoPreview: ShapeableImageView
+    private lateinit var viewFinder: PreviewView
     private lateinit var photoTextView: TextView
     private lateinit var videoTextView: TextView
+    private val cameraViewModel: CameraViewModel by viewModels()
 
     private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
 
 
     private fun initViews() {
-        recordVideoButton = binding.recordVideoButton
         flipCameraButton = binding.flipCameraButton
         captureImageButton = binding.capturePhotoButton
-        stopVideoRecordingButton = binding.stopRecordingButton
-        pauseRecordingVideoButton = binding.pauseRecordingButton
+        viewFinder = binding.viewFinder
+    }
+
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permission is not granted
+            // Request the permission
+            cameraPermissionLauncher.launch(CAMERA)
+        } else {
+            // Permission is already granted
+            startCamera()
+
+
+        }
     }
 
     override fun onCreateView(
@@ -88,25 +82,38 @@ class CameraFragment : Fragment() {
     ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         initViews()
-        permissionViewModel.result.observe(viewLifecycleOwner) { result ->
-            if (result == PermissionResult.GRANTED) {
-                startCamera()
-            }
-
-
-        }
+        cameraController.bindToLifecycle(this)
+        viewFinder.controller = cameraController
         imageVideoPreview = binding.imageVideoPreview
+        registerCameraLauncher()
+        checkCameraPermission()
+        onDoubleClick()
+        cameraViewModel.lensFacing.observe(viewLifecycleOwner) {
+            lensFacing = it
+            startCamera()
+        }
         binding.capturePhotoButton.setOnClickListener {
             takePicture()
+        }
+
+
+        binding.flipCameraButton.setOnClickListener {
+            cameraViewModel.flipCamera()
         }
         return binding.root
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val navController = findNavController()
-        registerCameraLauncher()
+    private fun onDoubleClick() {
+        binding.root.setOnClickListener(object : OnDoubleClickListener() {
+            override fun onDoubleClick(view: View) {
+                try {
+                    cameraViewModel.flipCamera()
+                } catch (ex: Exception) {
+                    Log.e("TAG", "onDoubleClick: Switching camera failed", ex)
+                }
+            }
+        })
     }
 
 
@@ -154,7 +161,7 @@ class CameraFragment : Fragment() {
                 intent.data = uri
                 startActivity(intent)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
@@ -164,112 +171,11 @@ class CameraFragment : Fragment() {
         _binding = null
     }
 
-    /**
-     * Switch to video recording
-     */
-    @androidx.camera.view.video.ExperimentalVideo
-    private fun enableVideoUseCase() {
-        cameraController.setEnabledUseCases(VIDEO_CAPTURE)
-    }
-
-    private fun enableImageCaptureUseCase() {
-        cameraController.setEnabledUseCases(IMAGE_CAPTURE or IMAGE_ANALYSIS)
-    }
-    //cameraController.setEnabledUseCases(IMAGE_CAPTURE|IMAGE_ANALYSIS);
-
     private fun startCamera() {
         val cameraSelector: CameraSelector = CameraSelector.Builder()
             .requireLensFacing(lensFacing)
             .build()
-        val viewFinder = binding.viewFinder
-        cameraController = LifecycleCameraController(requireContext())
-        cameraController.bindToLifecycle(this)
         cameraController.cameraSelector = cameraSelector
-        viewFinder.controller = cameraController
-
-    }
-
-
-    private fun updateUI(event: VideoRecordEvent) {
-        when (event) {
-            is VideoRecordEvent.Finalize -> {
-                val options = event.outputOptions
-                val error = event.error
-                val errorMessage = Utils.getErrorMessage(error)
-                when (error) {
-                    /**
-                     * The recording succeeded without an error
-                     */
-
-                    ERROR_NONE -> {
-                        val uri = event.outputResults.outputUri
-                    }
-                    /**
-                     * A properly constructed file is generated when these errors occur
-                     */
-                    ERROR_FILE_SIZE_LIMIT_REACHED, ERROR_SOURCE_INACTIVE,
-                    ERROR_DURATION_LIMIT_REACHED -> {
-                        pauseRecordingVideoButton.visibility = View.INVISIBLE
-                        val uri: Uri = event.outputResults.outputUri
-                    }
-
-                    /**
-                     * A file might or might not be generated depending whether the storage
-                     * became full before recording started or it became full during recording.
-                     */
-                    ERROR_INSUFFICIENT_STORAGE -> {
-
-                    }
-
-                    /**
-                     * A file generated from these errors is not well formed and so,
-                     * delete the generated file
-                     */
-                    ERROR_UNKNOWN, ERROR_ENCODING_FAILED,
-                    ERROR_RECORDER_ERROR, ERROR_NO_VALID_DATA,
-                    ERROR_INVALID_OUTPUT_OPTIONS -> {
-                        if (options is MediaStoreOutputOptions) {
-                            val uri: Uri = event.outputResults.outputUri
-                            requireContext().contentResolver.delete(uri, null, null)
-                        }
-
-                    }
-
-
-                }
-            }
-
-            is VideoRecordEvent.Pause -> {
-
-            }
-
-            is VideoRecordEvent.Resume -> {
-
-            }
-        }
-    }
-
-    @androidx.camera.view.video.ExperimentalVideo
-    private fun recordVideo() {
-        if (!cameraController.isRecording) {
-            val outputOptions = MediaStoreOutputOptions.Builder(
-                requireContext().contentResolver,
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            )
-                .setContentValues(Utils.createContentValues(isImage = false))
-                .build()
-
-            recording = cameraController.startRecording(
-                outputOptions,
-                AudioConfig.AUDIO_DISABLED,
-                ContextCompat.getMainExecutor(requireContext())
-            ) { event ->
-                updateUI(event)
-            }
-
-        }
-
-
     }
 
     private fun takePicture() {

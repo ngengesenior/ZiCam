@@ -22,18 +22,18 @@
         android:name="com.ngengeapps.zicam.video.VideoCameraFragment"
         android:label=""
         tools:layout="@layout/fragment_video_camera" />
-    <fragment
-        android:id="@+id/permissionsFragment"
-        android:name="com.ngengeapps.zicam.permissions.PermissionsFragment"
-        android:label=""
-        tools:layout="@layout/fragment_permissions">
-        <action
-            android:id="@+id/action_permissionsFragment_to_photoCameraFragment"
-            app:destination="@id/photoCameraFragment"
-            app:popUpTo="@id/photoCameraFragment" />
-        <action
-            android:id="@+id/action_permissionsFragment_to_videoCamFragment"
-            app:destination="@id/videoCamFragment"
-            app:popUpTo="@id/videoCamFragment" />
-    </fragment>
+    <!-- <fragment
+         android:id="@+id/permissionsFragment"
+         android:name="com.ngengeapps.zicam.permissions.PermissionsFragment"
+         android:label=""
+         tools:layout="@layout/fragment_permissions">
+         <action
+             android:id="@+id/action_permissionsFragment_to_photoCameraFragment"
+             app:destination="@id/photoCameraFragment"
+             app:popUpTo="@id/photoCameraFragment" />
+         <action
+             android:id="@+id/action_permissionsFragment_to_videoCamFragment"
+             app:destination="@id/videoCamFragment"
+             app:popUpTo="@id/videoCamFragment" />
+     </fragment>-->
 </navigation>

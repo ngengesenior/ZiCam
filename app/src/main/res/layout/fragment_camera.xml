@@ -10,23 +10,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:background="@android:color/black"
         tools:context=".CameraFragment">
 
-
-        <TextView
-            android:id="@+id/photoTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="36dp"
-            android:text="@string/photo"
-            android:textAllCaps="true"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/recordVideoButton"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/flipCameraButton"
@@ -38,7 +23,8 @@
             app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintHorizontal_bias="0.41"
-            app:layout_constraintStart_toStartOf="@+id/viewFinder" />
+            app:layout_constraintStart_toStartOf="@+id/viewFinder"
+            app:tint="@android:color/black" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
@@ -58,8 +44,6 @@
             android:id="@+id/viewFinder"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@android:color/transparent"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -69,32 +53,20 @@
         </androidx.camera.view.PreviewView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/recordVideoButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/camera_button_desc"
-            android:src="@drawable/video_capture_shape"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@id/guideline"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/capturePhotoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/photo_camera"
-            android:visibility="visible"
             app:backgroundTint="@android:color/white"
             app:layout_constraintBottom_toTopOf="@id/guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:visibility="invisible" />
+            app:tint="@android:color/black" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imageVideoPreview"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_marginEnd="10dp"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
@@ -105,51 +77,6 @@
             app:strokeColor="@android:color/black"
             app:strokeWidth="1dp"
             tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/videoTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="@string/video"
-            android:textAllCaps="true"
-            app:layout_constraintBottom_toBottomOf="@+id/photoTextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toTopOf="@+id/photoTextView"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <ImageView
-            android:id="@+id/pauseRecordingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/pause_recording"
-            android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/videoTextView" />
-
-        <ImageView
-            android:id="@+id/stopRecordingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:src="@drawable/stop_recording"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/photoTextView" />
-
-        <ImageView
-            android:id="@+id/resumeRecordingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/resume"
-            android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="@+id/guideline2"
-            app:layout_constraintTop_toBottomOf="@+id/videoTextView"
-            app:tint="@android:color/holo_red_light" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
