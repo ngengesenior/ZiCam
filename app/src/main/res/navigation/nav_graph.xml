@@ -3,16 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/videoCamFragment">
+    app:startDestination="@id/photoCameraFragment">
 
     <fragment
         android:id="@+id/photoCameraFragment"
         android:name="com.ngengeapps.zicam.CameraFragment"
         android:label=""
-        tools:layout="@layout/fragment_camera" />
+        tools:layout="@layout/fragment_camera">
+        <action
+            android:id="@+id/action_photoCameraFragment_to_videoCamFragment"
+            app:destination="@id/videoCamFragment" />
+        <action
+            android:id="@+id/action_photoCameraFragment_to_videoCamFragment2"
+            app:destination="@id/videoCamFragment" />
+    </fragment>
     <fragment
         android:id="@+id/videoCamFragment"
         android:name="com.ngengeapps.zicam.video.VideoCameraFragment"
         android:label=""
         tools:layout="@layout/fragment_video_camera" />
+    <fragment
+        android:id="@+id/permissionsFragment"
+        android:name="com.ngengeapps.zicam.permissions.PermissionsFragment"
+        android:label=""
+        tools:layout="@layout/fragment_permissions">
+        <action
+            android:id="@+id/action_permissionsFragment_to_photoCameraFragment"
+            app:destination="@id/photoCameraFragment"
+            app:popUpTo="@id/photoCameraFragment" />
+        <action
+            android:id="@+id/action_permissionsFragment_to_videoCamFragment"
+            app:destination="@id/videoCamFragment"
+            app:popUpTo="@id/videoCamFragment" />
+    </fragment>
 </navigation>

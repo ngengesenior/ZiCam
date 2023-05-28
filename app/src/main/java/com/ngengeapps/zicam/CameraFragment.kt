@@ -1,15 +1,21 @@
 package com.ngengeapps.zicam
 
 
+import android.Manifest.permission.CAMERA
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -33,11 +39,14 @@ import androidx.camera.view.CameraController.IMAGE_CAPTURE
 import androidx.camera.view.CameraController.VIDEO_CAPTURE
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.video.AudioConfig
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.imageview.ShapeableImageView
 import com.ngengeapps.zicam.databinding.FragmentCameraBinding
+import com.ngengeapps.zicam.permissions.PermissionViewModel
 
 
 class CameraFragment : Fragment() {
@@ -62,6 +71,8 @@ class CameraFragment : Fragment() {
     private lateinit var photoTextView: TextView
     private lateinit var videoTextView: TextView
 
+    private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
+
 
     private fun initViews() {
         recordVideoButton = binding.recordVideoButton
@@ -77,7 +88,6 @@ class CameraFragment : Fragment() {
     ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
         initViews()
-
         permissionViewModel.result.observe(viewLifecycleOwner) { result ->
             if (result == PermissionResult.GRANTED) {
                 startCamera()
@@ -93,6 +103,60 @@ class CameraFragment : Fragment() {
 
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+        registerCameraLauncher()
+    }
+
+
+    private fun registerCameraLauncher() {
+        cameraPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    //Camera permissions granted
+                    startCamera()
+                } else {
+                    //
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            requireActivity(),
+                            CAMERA
+                        )
+                    ) {
+                        showPermissionRationale()
+
+                    } else {
+                        showPermissionDeniedDialog()
+                    }
+                }
+            }
+
+    }
+
+    private fun showPermissionRationale() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Camera permission required")
+            .setMessage("The app needs camera permission to take photos or videos.")
+            .setPositiveButton("Ok") { _, _ ->
+                cameraPermissionLauncher.launch(CAMERA)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showPermissionDeniedDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Camera permission denied")
+            .setMessage("Without camera permission, the app cannot take photos or videos. Please go to Settings to grant the app camera permission.")
+            .setPositiveButton("Settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", requireActivity().packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

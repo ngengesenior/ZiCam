@@ -60,11 +60,14 @@ dependencies {
     implementation("androidx.camera:camera-view:${cameraxVersion}")
     implementation("androidx.camera:camera-mlkit-vision:${cameraxVersion}")
     implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+    implementation("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.0-alpha01")
+
 
     // Used to call ListenableFuture.await in Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
 
 }

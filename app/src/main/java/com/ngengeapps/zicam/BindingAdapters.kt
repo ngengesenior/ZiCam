@@ -1,11 +1,12 @@
-package com.ngengeapps.zicam.video
+package com.ngengeapps.zicam
 
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.ngengeapps.zicam.R
+import com.ngengeapps.zicam.video.RecordingState
 
 @BindingAdapter("hideShowStillCamera")
 fun hideShowStillCamera(button: FloatingActionButton, state: RecordingState) {
@@ -67,6 +68,22 @@ fun showHideTimerChip(chip: Chip, state: RecordingState) {
         else -> {
             chip.visibility = View.GONE
         }
+    }
+}
+
+@BindingAdapter("enableOrDisable")
+fun enableOrDisableNextButton(button: Button, permissions: List<String>?) {
+    button.isEnabled =
+        !(permissions.isNullOrEmpty()
+                || !permissions.contains(android.Manifest.permission.CAMERA))
+}
+
+@BindingAdapter("hideOrShowAudioRequestButton")
+fun hideOrShowAudioRequestButton(button: Button, permissions: List<String>?) {
+    if (!permissions.isNullOrEmpty() && permissions.contains(android.Manifest.permission.RECORD_AUDIO)) {
+        button.visibility = View.INVISIBLE
+    } else {
+        button.visibility = View.VISIBLE
     }
 }
 
