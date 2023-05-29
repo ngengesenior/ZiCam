@@ -11,4 +11,5 @@
     <string name="access_camera">Grant Permissions</string>
     <string name="optional_permissions">Grant AUDIO Permissions</string>
     <string name="next">Next</string>
+    <string name="flip_camera_desc">Flip current camera</string>
 </resources>

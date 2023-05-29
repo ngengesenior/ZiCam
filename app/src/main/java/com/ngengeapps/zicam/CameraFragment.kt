@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -81,6 +80,8 @@ class CameraFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCameraBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = this
+        binding.cameraViewModel = cameraViewModel
         initViews()
         cameraController.bindToLifecycle(this)
         viewFinder.controller = cameraController
@@ -88,24 +89,33 @@ class CameraFragment : Fragment() {
         registerCameraLauncher()
         checkCameraPermission()
         onDoubleClick()
-        cameraViewModel.lensFacing.observe(viewLifecycleOwner) {
-            lensFacing = it
-            startCamera()
-        }
-        binding.capturePhotoButton.setOnClickListener {
-            takePicture()
-        }
+        cameraViewModel
+            .lensFacing
+            .observe(viewLifecycleOwner) {
+                lensFacing = it
+                startCamera()
+            }
+        binding
+            .capturePhotoButton
+            .setOnClickListener {
+                takePicture()
+            }
 
 
-        binding.flipCameraButton.setOnClickListener {
+        binding.root.setOnClickListener {
             cameraViewModel.flipCamera()
+        }
+
+        cameraViewModel.imageUri.observe(viewLifecycleOwner) {
+            bindImageUri(binding.imageVideoPreview, it)
         }
         return binding.root
 
     }
 
+
     private fun onDoubleClick() {
-        binding.root.setOnClickListener(object : OnDoubleClickListener() {
+        viewFinder.setOnClickListener(object : OnDoubleClickListener() {
             override fun onDoubleClick(view: View) {
                 try {
                     cameraViewModel.flipCamera()
@@ -188,19 +198,17 @@ class CameraFragment : Fragment() {
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Image captured ${outputFileResults.savedUri}",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
                     imageVideoPreview.visibility = View.VISIBLE
-                    imageVideoPreview.setImageURI(outputFileResults.savedUri)
+                    //imageVideoPreview.setImageURI(outputFileResults.savedUri)
+                    cameraViewModel.setImageUri(outputFileResults.savedUri)
 
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-
+                    Log.e(
+                        CameraViewModel::class.simpleName,
+                        "onError: ${exception.localizedMessage}",
+                    )
                 }
 
             }

@@ -1,11 +1,14 @@
 package com.ngengeapps.zicam
 
+import android.net.Uri
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.databinding.BindingAdapter
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.imageview.ShapeableImageView
 import com.ngengeapps.zicam.video.RecordingState
 
 @BindingAdapter("hideShowStillCamera")
@@ -76,6 +79,15 @@ fun enableOrDisableNextButton(button: Button, permissions: List<String>?) {
     button.isEnabled =
         !(permissions.isNullOrEmpty()
                 || !permissions.contains(android.Manifest.permission.CAMERA))
+}
+
+@BindingAdapter("bindImageUri")
+fun bindImageUri(view: ShapeableImageView, uri: Uri?) {
+    uri?.let {
+        Toast.makeText(view.context, "The Uri is $uri", Toast.LENGTH_LONG)
+            .show()
+        view.setImageURI(it)
+    }
 }
 
 @BindingAdapter("hideOrShowAudioRequestButton")
