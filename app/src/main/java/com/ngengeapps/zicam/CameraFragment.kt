@@ -13,19 +13,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.imageview.ShapeableImageView
 import com.ngengeapps.zicam.databinding.FragmentCameraBinding
 
@@ -45,18 +44,18 @@ class CameraFragment : Fragment() {
     private lateinit var captureImageButton: View
     private lateinit var imageVideoPreview: ShapeableImageView
     private lateinit var viewFinder: PreviewView
-    private lateinit var photoTextView: TextView
-    private lateinit var videoTextView: TextView
     private val cameraViewModel: CameraViewModel by viewModels()
-
     private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
+    private val navController: NavController by lazy { findNavController() }
 
 
     private fun initViews() {
         flipCameraButton = binding.flipCameraButton
         captureImageButton = binding.capturePhotoButton
         viewFinder = binding.viewFinder
+        imageVideoPreview = binding.imageVideoPreview
     }
+
 
     private fun checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -64,15 +63,21 @@ class CameraFragment : Fragment() {
                 CAMERA
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // Permission is not granted
-            // Request the permission
-            cameraPermissionLauncher.launch(CAMERA)
+            navController.navigate(
+                CameraFragmentDirections.actionPhotoCameraFragmentToPermissionsFragment(
+                    R.id.photoCameraFragment
+                )
+            )
         } else {
             // Permission is already granted
             startCamera()
 
-
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkCameraPermission()
     }
 
     override fun onCreateView(
@@ -83,33 +88,30 @@ class CameraFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.cameraViewModel = cameraViewModel
         initViews()
+        checkCameraPermission()
         cameraController.bindToLifecycle(this)
         viewFinder.controller = cameraController
-        imageVideoPreview = binding.imageVideoPreview
-        registerCameraLauncher()
-        checkCameraPermission()
+        //registerCameraLauncher()
         onDoubleClick()
+        setClickListeners()
         cameraViewModel
             .lensFacing
             .observe(viewLifecycleOwner) {
                 lensFacing = it
                 startCamera()
             }
-        binding
-            .capturePhotoButton
+        return binding.root
+
+    }
+
+    private fun setClickListeners() {
+        captureImageButton
             .setOnClickListener {
                 takePicture()
             }
-
-
-        binding.root.setOnClickListener {
+        flipCameraButton.setOnClickListener {
             cameraViewModel.flipCamera()
         }
-
-        cameraViewModel.imageUri.observe(viewLifecycleOwner) {
-            bindImageUri(binding.imageVideoPreview, it)
-        }
-        return binding.root
 
     }
 
@@ -126,29 +128,6 @@ class CameraFragment : Fragment() {
         })
     }
 
-
-    private fun registerCameraLauncher() {
-        cameraPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-                if (isGranted) {
-                    //Camera permissions granted
-                    startCamera()
-                } else {
-                    //
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(
-                            requireActivity(),
-                            CAMERA
-                        )
-                    ) {
-                        showPermissionRationale()
-
-                    } else {
-                        showPermissionDeniedDialog()
-                    }
-                }
-            }
-
-    }
 
     private fun showPermissionRationale() {
         AlertDialog.Builder(requireContext())
@@ -199,7 +178,6 @@ class CameraFragment : Fragment() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     imageVideoPreview.visibility = View.VISIBLE
-                    //imageVideoPreview.setImageURI(outputFileResults.savedUri)
                     cameraViewModel.setImageUri(outputFileResults.savedUri)
 
                 }

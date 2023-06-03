@@ -3,9 +3,10 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
+        /*maven {
+            url = uri("https://androidx.dev/snapshots/builds/10250649/artifacts/repository")
+        }*/
+
     }
 }
 dependencyResolutionManagement {

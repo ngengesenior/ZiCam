@@ -6,15 +6,17 @@ import androidx.lifecycle.ViewModel
 import com.ngengeapps.zicam.PermissionResult
 
 class PermissionViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
-    val result = MutableLiveData(PermissionResult.NOTHING)
-    var permissions: MutableLiveData<MutableSet<String>> = MutableLiveData(mutableSetOf())
+    var result = MutableLiveData(PermissionResult.NOTHING)
         private set
+
+    /*var permissions: MutableLiveData<MutableSet<String>> = MutableLiveData(mutableSetOf())
+        private set*/
 
     fun sendResult(newResult: PermissionResult) {
         result.value = newResult
     }
 
-    fun addPermission(permission: String) {
+    /*fun addPermission(permission: String) {
         permissions.value?.add(permission)
-    }
+    }*/
 }

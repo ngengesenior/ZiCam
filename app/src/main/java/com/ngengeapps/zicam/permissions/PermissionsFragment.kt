@@ -17,20 +17,31 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.ngengeapps.zicam.PermissionResult
+import com.ngengeapps.zicam.R
 import com.ngengeapps.zicam.databinding.FragmentPermissionsBinding
+
 
 class PermissionsFragment : Fragment() {
     private var _binding: FragmentPermissionsBinding? = null
+    private val args: PermissionsFragmentArgs by navArgs()
     private val binding get() = _binding!!
     private val permissionViewModel: PermissionViewModel by viewModels()
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+    private val acceptedPermissions: MutableSet<String> = mutableSetOf()
+    private val navController by lazy {
+        findNavController()
+    }
+
     private fun registerPermissionsLauncher() {
         permissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsResult ->
                 for (result in permissionsResult) {
                     if (result.key == CAMERA) {
                         if (result.value) {
-                            permissionViewModel.addPermission(CAMERA)
+                            acceptedPermissions.add(CAMERA)
                         } else {
                             if (ActivityCompat.shouldShowRequestPermissionRationale(
                                     requireActivity(),
@@ -45,7 +56,8 @@ class PermissionsFragment : Fragment() {
                         }
                     } else {
                         if (result.value) {
-                            permissionViewModel.addPermission(RECORD_AUDIO)
+                            //permissionViewModel.addPermission(RECORD_AUDIO)
+                            acceptedPermissions.add(RECORD_AUDIO)
                         } else {
                             if (ActivityCompat.shouldShowRequestPermissionRationale(
                                     requireActivity(),
@@ -60,7 +72,11 @@ class PermissionsFragment : Fragment() {
                         }
                     }
                 }
-
+                if (acceptedPermissions.contains(CAMERA)) {
+                    permissionViewModel.sendResult(PermissionResult.GRANTED)
+                } else {
+                    permissionViewModel.sendResult(PermissionResult.DENIED)
+                }
             }
 
     }
@@ -68,7 +84,7 @@ class PermissionsFragment : Fragment() {
     private fun toastAudioPermissionDenied() {
         Toast.makeText(
             requireContext(),
-            "Your videos will have no sound since you have refused to grant AUDIO permissions.You can grant it in app settings",
+            getString(R.string.no_sound_warning),
             Toast.LENGTH_SHORT
         ).show()
     }
@@ -76,7 +92,7 @@ class PermissionsFragment : Fragment() {
     private fun toastCameraPermissionDenied() {
         Toast.makeText(
             requireContext(),
-            "You will be unable to use this app without CAMERA permission. Change the permission in app settings",
+            getString(R.string.no_camera_permission_warning),
             Toast.LENGTH_SHORT
         ).show()
     }
@@ -84,11 +100,11 @@ class PermissionsFragment : Fragment() {
     private fun String.getPermissionMessage(): String {
         return when {
             this == RECORD_AUDIO -> {
-                "RECORD AUDIO permission is required to record audio for your video to have sound"
+                getString(R.string.audio_is_required)
             }
 
             this == CAMERA -> {
-                "ZiCam needs camera permission to take photos or videos."
+                getString(R.string.needs_camera)
             }
 
             else -> {
@@ -119,9 +135,9 @@ class PermissionsFragment : Fragment() {
 
     private fun showCameraPermissionDeniedDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Camera permission denied")
-            .setMessage("Without camera permission, the app cannot take photos or videos. Please go to Settings to grant the app camera permission.")
-            .setPositiveButton("Settings") { _, _ ->
+            .setTitle(getString(R.string.permission_denied_title))
+            .setMessage(getString(R.string.permissions_denied_warning))
+            .setPositiveButton(getString(R.string.settings)) { _, _ ->
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 val uri =
                     Uri.fromParts("package", requireContext().applicationContext.packageName, null)
@@ -137,7 +153,7 @@ class PermissionsFragment : Fragment() {
             CAMERA -> {
                 showPermissionRationale(
                     permission = permission,
-                    title = "Camera permission required",
+                    title = getString(R.string.permission_required_title),
                     message = permission.getPermissionMessage(),
                     onPositiveButtonClick = {
                         permissionsLauncher.launch(permissions)
@@ -151,8 +167,8 @@ class PermissionsFragment : Fragment() {
             RECORD_AUDIO -> {
                 showPermissionRationale(
                     permission = permission,
-                    title = "Record Audio permission",
-                    message = "Grant Record Audio permission else your recorded videos will have no sound",
+                    title = getString(R.string.record_audio_permission),
+                    message = getString(R.string.grant_audio_record_title),
                     onPositiveButtonClick = {
                         permissionsLauncher.launch(permissions)
 
@@ -181,10 +197,16 @@ class PermissionsFragment : Fragment() {
     ): View {
         _binding = FragmentPermissionsBinding.inflate(inflater, container, false)
         if (areAllPermissionsAreGranted()) {
-            permissionViewModel.addPermission(CAMERA)
-            permissionViewModel.addPermission(RECORD_AUDIO)
+            permissionViewModel.sendResult(PermissionResult.GRANTED)
+        } else if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionViewModel.sendResult(PermissionResult.GRANTED)
         }
         registerPermissionsLauncher()
+        observePermissions()
         binding.grantPermissionsButton.setOnClickListener {
             permissionsLauncher.launch(permissions)
         }
@@ -194,10 +216,11 @@ class PermissionsFragment : Fragment() {
     }
 
     private fun observePermissions() {
-        permissionViewModel.permissions.observe(this) {
-            if (permissions.size == 2) {
-
+        permissionViewModel.result.observe(viewLifecycleOwner) {
+            if (it == PermissionResult.GRANTED) {
+                navController.popBackStack(destinationId = args.callerId, inclusive = false)
             }
+
         }
     }
 

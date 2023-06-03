@@ -120,6 +120,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageVideoPreview"
+            hideShowVideoPreview="@{videoEventViewModel.currentState}"
+            android:layout_width="@dimen/previewWidth"
+            android:layout_height="@dimen/previewWidth"
+            android:layout_marginEnd="24dp"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/guideline3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:shapeAppearanceOverlay="@style/roundImageStyle"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="1dp"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

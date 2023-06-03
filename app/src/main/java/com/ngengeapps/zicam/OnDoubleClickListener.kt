@@ -22,5 +22,5 @@ abstract class OnDoubleClickListener : View.OnClickListener {
         private const val ON_DOUBLE_TAP_TIME_DELTA = 300
     }
 
-    abstract fun onDoubleClick(view: Vitew)
+    abstract fun onDoubleClick(view: View)
 }

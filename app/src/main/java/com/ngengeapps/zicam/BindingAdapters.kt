@@ -1,5 +1,6 @@
 package com.ngengeapps.zicam
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.view.View
 import android.widget.Button
@@ -20,6 +21,28 @@ fun hideShowStillCamera(button: FloatingActionButton, state: RecordingState) {
 
         else -> {
             button.visibility = View.GONE
+        }
+    }
+}
+
+@BindingAdapter("setBitmapThumb")
+fun setBitmapThumb(imageView: ShapeableImageView, bitmap: Bitmap?) {
+    bitmap?.let {
+        imageView.setImageBitmap(it)
+    }
+}
+
+
+@BindingAdapter("hideShowVideoPreview")
+fun hideShowVideoPreview(view: View, state: RecordingState) {
+    when (state) {
+        RecordingState.IDLE, RecordingState.FINALIZE -> {
+            view.visibility = View.VISIBLE
+        }
+
+        else -> {
+            view.visibility = View.INVISIBLE
+
         }
     }
 }

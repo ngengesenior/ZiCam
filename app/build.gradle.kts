@@ -1,7 +1,9 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
+
 }
 
 android {
@@ -31,6 +33,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    packaging {
+        resources.excludes.add("META-INF/AL2.0")
+        resources.excludes.add("META-INF/LGPL2.1")
+
+    }
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -44,12 +51,16 @@ dependencies {
     //implementation(project(mapOf("path" to ":opencv46")))
     implementation("com.quickbirdstudios:opencv-contrib:4.5.3.0")
     val cameraxVersion = "1.3.0-alpha06"
+    val navigationVersion = "2.5.3"
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
-    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion") {
+
+    }
+    //implementation("androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion")
 
 
     // CameraX library

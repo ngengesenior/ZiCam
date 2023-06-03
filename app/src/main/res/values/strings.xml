@@ -5,11 +5,22 @@
     <string name="camera_button_desc">Camera shutter button</string>
     <string name="photo">Photo</string>
     <string name="video">Video</string>
-    <string name="permissions_explanation">\u2022 <b>CAMERA</b> permission is necessary to take photos and videos with the app.\u2022 \n\n <b>RECORD AUDIO</b> permission is optional, but if granted, it will allow videos to have sound.</string>
+    <string name="permissions_explanation">\u2022 <b>CAMERA</b> permission is necessary to take photos and videos with ZiCam app.\u2022 \n\n <b>RECORD AUDIO</b> permission is required for your recorded videos to have sound.</string>
     <string name="permissions_and_privacy">Permissions and Privacy</string>
     <string name="mandatory_permissions">Mandatory permissions</string>
     <string name="access_camera">Grant Permissions</string>
     <string name="optional_permissions">Grant AUDIO Permissions</string>
     <string name="next">Next</string>
     <string name="flip_camera_desc">Flip current camera</string>
+    <string name="video_camw_switch_message">Switching the Camera while recording is not yet supported</string>
+    <string name="permissions_denied_warning">Without camera permission, the app cannot take photos or videos. Please go to Settings to grant the app camera permission.</string>
+    <string name="permission_denied_title">Camera permission denied</string>
+    <string name="settings">Settings</string>
+    <string name="permission_required_title">Camera permission required</string>
+    <string name="record_audio_permission">Record Audio permission</string>
+    <string name="grant_audio_record_title">Grant Record Audio permission else your recorded videos will have no sound</string>
+    <string name="no_sound_warning">Your videos will have no sound since you have refused to grant AUDIO permissions.You can grant it in app settings</string>
+    <string name="no_camera_permission_warning">You will be unable to use this app without CAMERA permission. Change the permission in app settings</string>
+    <string name="audio_is_required">RECORD AUDIO permission is required to record audio for your video to have sound</string>
+    <string name="needs_camera">ZiCam needs camera permission to take photos and videos.</string>
 </resources>
